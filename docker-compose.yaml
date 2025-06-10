@@ -1,6 +1,6 @@
 services:
   database:
-    image: postgis/postgis
+    image: ghcr.io/baosystems/postgis:latest
     environment:
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=password
