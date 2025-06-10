@@ -1,0 +1,65 @@
+BEGIN;
+
+-- Using IDENTITY for id instead of SERIAL because it's considered a better alternative
+-- for modern Postgres. Similarly BIGINT is considered a safe default new applications,
+-- especially if the table is expected to scale to a large amount of records,
+-- which seems likely for a listing table.
+CREATE TABLE
+  listings (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    place_id TEXT,
+    slug TEXT UNIQUE NOT NULL,
+    address_line_1 TEXT NOT NULL,
+    address_line_2 TEXT,
+    city TEXT NOT NULL,
+    "state" TEXT NOT NULL CHECK (LENGTH(state) = 2),
+    zip TEXT NOT NULL,
+    geom GEOMETRY (POINT, 4326) NOT NULL,
+    neighborhood TEXT,
+    list_price INTEGER NOT NULL,
+    sold_price INTEGER,
+    listed_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    sold_date TIMESTAMP WITH TIME ZONE,
+    property_type_id INTEGER NOT NULL,
+    listing_status_id INTEGER NOT NULL,
+    "description" TEXT,
+    beds INTEGER NOT NULL DEFAULT 0,
+    baths INTEGER NOT NULL DEFAULT 0,
+    sqft INTEGER,
+    lot_size INTEGER,
+    year_built INTEGER,
+    rental BOOLEAN NOT NULL DEFAULT FALSE,
+    waterfront BOOLEAN NOT NULL DEFAULT FALSE,
+    "view" BOOLEAN NOT NULL DEFAULT FALSE,
+    fireplace BOOLEAN NOT NULL DEFAULT FALSE,
+    basement BOOLEAN NOT NULL DEFAULT FALSE,
+    garage BOOLEAN NOT NULL DEFAULT FALSE,
+    new_construction BOOLEAN NOT NULL DEFAULT FALSE,
+    "pool" BOOLEAN NOT NULL DEFAULT FALSE,
+    air_conditioning BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (property_type_id) REFERENCES property_types (id),
+    FOREIGN KEY (listing_status_id) REFERENCES listing_statuses (id),
+    property_details JSONB NOT NULL DEFAULT '[]'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+  );
+
+COMMENT ON COLUMN listings.place_id IS 'The Google Maps geocoder place_id.';
+
+COMMENT ON COLUMN listings.geom IS 'The lat/lng for the listing. Using SRID 4326 ensures compatibility with GeoJSON (WGS 84)';
+
+CREATE INDEX listings_geom_idx ON listings USING GIST (geom);
+
+CREATE INDEX listings_place_id_idx ON listings (place_id);
+
+CREATE TRIGGER listings_set_updated_at_trigger BEFORE
+UPDATE ON listings FOR EACH ROW
+EXECUTE FUNCTION set_updated_at ();
+
+-- Trigger definition (same as before)
+CREATE TRIGGER generate_slug_trigger BEFORE INSERT
+OR
+UPDATE ON listings FOR EACH ROW
+EXECUTE PROCEDURE generate_slug_trigger_function ();
+
+COMMIT;
