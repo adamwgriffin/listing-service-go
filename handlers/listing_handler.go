@@ -49,14 +49,14 @@ type ListingResponse struct {
 	Address      ListingAddress  `json:"address"`
 	Latitude     float64         `json:"latitude"`
 	Longitude    float64         `json:"longitude"`
-	PlaceId      string          `jsong:"placeId"`
+	PlaceId      string          `json:"placeId"`
 	Neighborhood string          `json:"neighborhood"`
 	Status       string          `json:"status"`
 	Description  string          `json:"description"`
 	Beds         uint            `json:"beds"`
 	Baths        uint            `json:"baths"`
 	Sqft         uint            `json:"sqft"`
-	LotSize      uint            `josn:"lotSize"`
+	LotSize      uint            `json:"lotSize"`
 	View         bool            `json:"view"`
 	Waterfront   bool            `json:"waterfront"`
 	PhotoGallery json.RawMessage `json:"photoGallery"`
