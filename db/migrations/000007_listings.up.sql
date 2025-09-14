@@ -1,12 +1,8 @@
 BEGIN;
 
--- Using IDENTITY for id instead of SERIAL because it's considered a better alternative
--- for modern Postgres. Similarly BIGINT is considered a safe default new applications,
--- especially if the table is expected to scale to a large amount of records,
--- which seems likely for a listing table.
 CREATE TABLE
   listings (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     place_id TEXT,
     slug TEXT UNIQUE NOT NULL,
     address_line_1 TEXT NOT NULL,
